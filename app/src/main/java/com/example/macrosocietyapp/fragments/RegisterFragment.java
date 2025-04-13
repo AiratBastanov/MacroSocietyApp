@@ -3,7 +3,9 @@ package com.example.macrosocietyapp.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
+import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 import com.google.gson.Gson;
 
 import retrofit2.Call;
@@ -45,6 +48,9 @@ public class RegisterFragment extends Fragment {
     private Button buttonRegister;
     private View viewRegisterFragment;
     private ProgressBar progressBar;
+    private User user;
+
+    private SharedViewModel sharedViewModel;
 
     public RegisterFragment() {
         // Required empty public constructor
@@ -88,6 +94,8 @@ public class RegisterFragment extends Fragment {
         buttonRegister = viewRegisterFragment.findViewById(R.id.buttonRegister);
         TextView loginLink = viewRegisterFragment.findViewById(R.id.loginLink);
 
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         buttonRegister.setOnClickListener(v -> registerUser());
         loginLink.setOnClickListener(v -> navigateToLogin());
 
@@ -112,48 +120,24 @@ public class RegisterFragment extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        User user = new User(name, email);
-        String userJson = new Gson().toJson(user);
-        String encryptedData = AesEncryptionService.encrypt(userJson);
+        // Сохраняем данные пользователя во ViewModel
+        user = new User(name, email);
+        sharedViewModel.setUser(user);
 
-        if (encryptedData == null) {
-            progressBar.setVisibility(View.GONE);
-            Toast.makeText(getContext(), "Ошибка шифрования данных", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        MainAPI.registerUser(encryptedData, new Callback<String>() {
+        // Отправляем код подтверждения
+        MainAPI.sendVerificationCode(email, new Callback<Void>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    String decryptedResponse = AesEncryptionService.decrypt(response.body());
-                    if (decryptedResponse != null) {
-                        User registeredUser = new Gson().fromJson(decryptedResponse, User.class);
-                        SharedPrefManager.getInstance(requireContext()).saveUser(registeredUser);
-                        navigateToCodeVerification(registeredUser.email);
-                    } else {
-                        Toast.makeText(getContext(), "Ошибка расшифровки ответа", Toast.LENGTH_SHORT).show();
-                    }
+                if (response.isSuccessful()) {
+                    navigateToCodeVerification(email);
                 } else {
-                    String error = "Ошибка регистрации";
-                    if (response.errorBody() != null) {
-                        try {
-                            String errorBody = response.errorBody().string();
-                            String decryptedError = AesEncryptionService.decrypt(errorBody);
-                            if (decryptedError != null) {
-                                error = decryptedError;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Ошибка при отправке кода", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(getContext(), "Ошибка сети: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

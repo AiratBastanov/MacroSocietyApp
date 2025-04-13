@@ -5,7 +5,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.macrosocietyapp.R;
+import com.example.macrosocietyapp.activities.MainActivity;
 import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
+import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,6 +49,11 @@ public class CodeVerificationFragment extends Fragment {
     private String email;
     private ProgressBar progressBar;
     private View viewCodeVerificationFragment;
+    private SharedViewModel sharedViewModel;;
+
+    private CountDownTimer countDownTimer;
+    private final long RESEND_TIMEOUT_MS = 2 * 60 * 1000; // 2 минуты
+
 
     public CodeVerificationFragment() {
         // Required empty public constructor
@@ -81,6 +90,7 @@ public class CodeVerificationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         viewCodeVerificationFragment = inflater.inflate(R.layout.fragment_code_verification, container, false);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         return viewCodeVerificationFragment;
     }
 
@@ -105,33 +115,40 @@ public class CodeVerificationFragment extends Fragment {
             if (code.isEmpty()) {
                 editTextCode.setError("Введите код");
                 editTextCode.requestFocus();
-                return;
+            } else {
+                User user = sharedViewModel.getUser().getValue();
+                if (user != null) {
+                    registerUserInDb(user, code);
+                } else {
+                    Toast.makeText(getContext(), "Не удалось получить пользователя", Toast.LENGTH_SHORT).show();
+                }
             }
-            verifyCode(email, code);
         });
 
         buttonResendCode.setOnClickListener(v -> resendCode());
+
+        startResendTimer(); // Стартуем таймер при открытии
     }
 
-    private void verifyCode(String email, String code) {
+    private void registerUserInDb(User user, String code) {
         progressBar.setVisibility(View.VISIBLE);
 
-        MainAPI.loginWithCode(email, code, new Callback<Void>() {
+        MainAPI.registerUser(user,code, new Callback<User>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
                 progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful()) {
-                    // Успешная авторизация
-                    Toast.makeText(getContext(), "Вход выполнен успешно", Toast.LENGTH_SHORT).show();
-                    // Здесь можно перейти на главный экран приложения
-                    // ((MainActivity) requireActivity()).replaceFragment(new MainAppFragment());
+                if (response.isSuccessful() && response.body() != null) {
+                    User registeredUser = response.body();
+                    SharedPrefManager.getInstance(requireContext()).saveUser(registeredUser);
+                    Toast.makeText(getContext(), "Регистрация завершена", Toast.LENGTH_SHORT).show();
+                    ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
                 } else {
-                    Toast.makeText(getContext(), "Неверный код или срок его действия истек", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Ошибка регистрации", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(getContext(), "Ошибка сети: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -140,13 +157,13 @@ public class CodeVerificationFragment extends Fragment {
 
     private void resendCode() {
         progressBar.setVisibility(View.VISIBLE);
-
         MainAPI.sendVerificationCode(email, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Код отправлен повторно", Toast.LENGTH_SHORT).show();
+                    startResendTimer(); // Запускаем таймер после успешной отправки
                 } else {
                     Toast.makeText(getContext(), "Ошибка при отправке кода", Toast.LENGTH_SHORT).show();
                 }
@@ -158,5 +175,29 @@ public class CodeVerificationFragment extends Fragment {
                 Toast.makeText(getContext(), "Ошибка сети: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void startResendTimer() {
+        buttonResendCode.setEnabled(false);
+        countDownTimer = new CountDownTimer(RESEND_TIMEOUT_MS, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long secondsLeft = millisUntilFinished / 1000;
+                buttonResendCode.setText("Повторить через " + secondsLeft + " сек");
+            }
+
+            @Override
+            public void onFinish() {
+                buttonResendCode.setEnabled(true);
+                buttonResendCode.setText("Отправить код повторно");
+            }
+        }.start();
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 }

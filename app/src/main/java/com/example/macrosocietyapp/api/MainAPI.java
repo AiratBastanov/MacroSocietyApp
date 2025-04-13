@@ -1,5 +1,8 @@
 package com.example.macrosocietyapp.api;
 
+import com.example.macrosocietyapp.models.User;
+import com.example.macrosocietyapp.utils.AesEncryptionService;
+
 import java.security.SecureRandom;
 
 import javax.net.ssl.SSLContext;
@@ -44,17 +47,16 @@ public class MainAPI {
     }
 
     public static void sendVerificationCode(String email, Callback<Void> callback) {
-        api.sendVerificationCode(email).enqueue(callback);
+        String encryptedEmail = AesEncryptionService.encrypt(email);
+        api.sendVerificationCode(encryptedEmail).enqueue(callback);
     }
 
     public static void loginWithCode(String email, String code, Callback<Void> callback) {
-        api.loginWithCode(email, code).enqueue(callback);
+        String encryptedEmail = AesEncryptionService.encrypt(email);
+        api.loginWithCode(encryptedEmail, code).enqueue(callback);
     }
 
-    public static void registerUser(String encryptedUserData, Callback<String> callback) {
-        api.registerUser(encryptedUserData).enqueue(callback);
+    public static void registerUser(User user, String code, Callback<User> callback) {
+        api.registerUser(user,code).enqueue(callback); // теперь отправляем открыто (по HTTPS)
     }
 }
-
-
-
