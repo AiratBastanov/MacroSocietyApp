@@ -21,8 +21,10 @@ import com.example.macrosocietyapp.R;
 import com.example.macrosocietyapp.activities.MainActivity;
 import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.models.User;
+import com.example.macrosocietyapp.saveUserRoom.UserRepository;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
+import com.example.macrosocietyapp.viewmodel.SharedViewModelFactory;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,12 +37,9 @@ import retrofit2.Response;
  */
 public class CodeVerificationFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -49,7 +48,9 @@ public class CodeVerificationFragment extends Fragment {
     private String email,state;
     private ProgressBar progressBar;
     private View viewCodeVerificationFragment;
-    private SharedViewModel sharedViewModel;;
+    private SharedViewModel sharedViewModel;
+    private UserRepository userRepository;
+
 
     private CountDownTimer countDownTimer;
     private final long RESEND_TIMEOUT_MS = 2 * 60 * 1000; // 2 минуты
@@ -67,7 +68,6 @@ public class CodeVerificationFragment extends Fragment {
      * @param param2 Parameter 2.
      * @return A new instance of fragment CodeVerificationFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static CodeVerificationFragment newInstance(String param1, String param2) {
         CodeVerificationFragment fragment = new CodeVerificationFragment();
         Bundle args = new Bundle();
@@ -90,7 +90,9 @@ public class CodeVerificationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         viewCodeVerificationFragment = inflater.inflate(R.layout.fragment_code_verification, container, false);
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        // Используем ViewModel с Factory
+        sharedViewModel = new ViewModelProvider(requireActivity(), new SharedViewModelFactory(requireActivity().getApplication())).get(SharedViewModel.class);
+        userRepository = new UserRepository(requireContext());
         return viewCodeVerificationFragment;
     }
 
@@ -144,13 +146,14 @@ public class CodeVerificationFragment extends Fragment {
     private void registerUserInDb(User user, String code) {
         progressBar.setVisibility(View.VISIBLE);
 
-        MainAPI.registerUser(user,code, new Callback<User>() {
+        MainAPI.registerUser(user, code, new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     User registeredUser = response.body();
-                    SharedPrefManager.getInstance(requireContext()).saveUser(registeredUser);
+                    sharedViewModel.saveUserToDb(registeredUser);
+                    SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Регистрация завершена", Toast.LENGTH_SHORT).show();
                     ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
                 } else {
@@ -175,7 +178,8 @@ public class CodeVerificationFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     User loggedInUser = response.body();
-                    SharedPrefManager.getInstance(requireContext()).saveUser(loggedInUser);
+                    sharedViewModel.saveUserToDb(loggedInUser);
+                    SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
                     ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
                 } else {

@@ -10,14 +10,21 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.macrosocietyapp.R;
 import com.example.macrosocietyapp.fragments.HomeFragment;
+import com.example.macrosocietyapp.fragments.ProfileFragment;
 import com.example.macrosocietyapp.models.User;
+import com.example.macrosocietyapp.saveUserRoom.UserRepository;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
+import com.example.macrosocietyapp.viewmodel.SharedViewModelFactory;
+
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
     private SharedViewModel sharedViewModel;
-    private User user;
+    private User currentUser;
+    private UserRepository repository;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,17 +32,21 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+        // Создание ViewModel через ViewModelFactory
+        sharedViewModel = new ViewModelProvider(this, new SharedViewModelFactory(getApplication())).get(SharedViewModel.class);
+        repository = new UserRepository(this);
 
-        // Проверяем, есть ли сохраненный пользователь
-        user = SharedPrefManager.getInstance(this).getUser();
-        if (user != null) {
-            // Переходим на главный экран приложения
-            // replaceFragment(new MainAppFragment());
-        } else {
-            // Показываем стартовый экран
-            replaceFragment(new HomeFragment());
-        }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            currentUser = repository.getCurrentUser();
+            runOnUiThread(() -> {
+                if (currentUser != null) {
+                    sharedViewModel.setUser(currentUser);
+                    replaceFragment(new ProfileFragment());
+                } else {
+                    replaceFragment(new HomeFragment());
+                }
+            });
+        });
     }
 
     public void replaceFragment(Fragment fragment) {

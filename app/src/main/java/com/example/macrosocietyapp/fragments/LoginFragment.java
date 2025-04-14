@@ -20,6 +20,7 @@ import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
+import com.example.macrosocietyapp.viewmodel.SharedViewModelFactory;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -90,7 +91,8 @@ public class LoginFragment extends Fragment {
         buttonLogin = viewLoginFragment.findViewById(R.id.buttonSendCode);
         TextView textViewRegister = viewLoginFragment.findViewById(R.id.textViewRegister);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        // Используем ViewModel с Factory
+        sharedViewModel = new ViewModelProvider(requireActivity(), new SharedViewModelFactory(requireActivity().getApplication())).get(SharedViewModel.class);
 
         buttonLogin.setOnClickListener(v -> sendVerificationCode());
         textViewRegister.setOnClickListener(v -> navigateToRegister());

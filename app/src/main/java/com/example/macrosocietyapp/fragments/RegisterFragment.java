@@ -22,6 +22,7 @@ import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
+import com.example.macrosocietyapp.viewmodel.SharedViewModelFactory;
 import com.google.gson.Gson;
 
 import retrofit2.Call;
@@ -94,7 +95,8 @@ public class RegisterFragment extends Fragment {
         buttonRegister = viewRegisterFragment.findViewById(R.id.buttonRegister);
         TextView loginLink = viewRegisterFragment.findViewById(R.id.loginLink);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        // Используем ViewModel с Factory
+        sharedViewModel = new ViewModelProvider(requireActivity(), new SharedViewModelFactory(requireActivity().getApplication())).get(SharedViewModel.class);
 
         buttonRegister.setOnClickListener(v -> registerUser());
         loginLink.setOnClickListener(v -> navigateToLogin());
