@@ -125,7 +125,7 @@ public class RegisterFragment extends Fragment {
         sharedViewModel.setUser(user);
 
         // Отправляем код подтверждения
-        MainAPI.sendVerificationCode(email, new Callback<Void>() {
+        MainAPI.sendVerificationCode(email,"register", new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progressBar.setVisibility(View.GONE);
@@ -148,6 +148,7 @@ public class RegisterFragment extends Fragment {
         CodeVerificationFragment fragment = new CodeVerificationFragment();
         Bundle args = new Bundle();
         args.putString("email", email);
+        args.putString("state", "register");
         fragment.setArguments(args);
         ((MainActivity) requireActivity()).replaceFragment(fragment);
     }

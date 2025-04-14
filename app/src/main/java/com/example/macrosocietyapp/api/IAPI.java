@@ -15,8 +15,9 @@ public interface IAPI {
     Call<User> registerUser(@Body User user, @Query("code") String code); // теперь не шифруем на клиенте
 
     @POST("api/users/checkemail")
-    Call<Void> sendVerificationCode(@Query("email") String encryptedEmail); // шифруем email
+    Call<Void> sendVerificationCode(@Query("email") String encryptedEmail,@Query("state") String state); // шифруем email
 
     @POST("api/users/login")
-    Call<Void> loginWithCode(@Query("email") String encryptedEmail, @Query("code") String code); // тоже
+    Call<User> loginWithCode(@Query("email") String encryptedEmail, @Query("code") String code);
+
 }

@@ -46,12 +46,12 @@ public class MainAPI {
         }
     }
 
-    public static void sendVerificationCode(String email, Callback<Void> callback) {
+    public static void sendVerificationCode(String email,String state, Callback<Void> callback) {
         String encryptedEmail = AesEncryptionService.encrypt(email);
-        api.sendVerificationCode(encryptedEmail).enqueue(callback);
+        api.sendVerificationCode(encryptedEmail,state).enqueue(callback);
     }
 
-    public static void loginWithCode(String email, String code, Callback<Void> callback) {
+    public static void loginWithCode(String email, String code, Callback<User> callback) {
         String encryptedEmail = AesEncryptionService.encrypt(email);
         api.loginWithCode(encryptedEmail, code).enqueue(callback);
     }

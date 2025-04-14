@@ -3,6 +3,7 @@ package com.example.macrosocietyapp.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import com.example.macrosocietyapp.activities.MainActivity;
 import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
+import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,6 +46,9 @@ public class LoginFragment extends Fragment {
     private View viewLoginFragment;
     private String email;
     private ProgressBar progressBar;
+    private User user;
+
+    private SharedViewModel sharedViewModel;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -85,6 +90,8 @@ public class LoginFragment extends Fragment {
         buttonLogin = viewLoginFragment.findViewById(R.id.buttonSendCode);
         TextView textViewRegister = viewLoginFragment.findViewById(R.id.textViewRegister);
 
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         buttonLogin.setOnClickListener(v -> sendVerificationCode());
         textViewRegister.setOnClickListener(v -> navigateToRegister());
 
@@ -102,7 +109,12 @@ public class LoginFragment extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        MainAPI.sendVerificationCode(email, new Callback<Void>() {
+        // Сохраняем почту пользователя во ViewModel
+        user = new User(email);
+        sharedViewModel.setUser(user);
+
+        // Отправляем код подтверждения
+        MainAPI.sendVerificationCode(email,"login", new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progressBar.setVisibility(View.GONE);
@@ -125,6 +137,7 @@ public class LoginFragment extends Fragment {
         CodeVerificationFragment fragment = new CodeVerificationFragment();
         Bundle args = new Bundle();
         args.putString("email", email);
+        args.putString("state", "login");
         fragment.setArguments(args);
         ((MainActivity) requireActivity()).replaceFragment(fragment);
     }

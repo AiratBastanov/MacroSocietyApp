@@ -46,7 +46,7 @@ public class CodeVerificationFragment extends Fragment {
 
     private EditText editTextCode;
     private Button buttonVerify,buttonResendCode;
-    private String email;
+    private String email,state;
     private ProgressBar progressBar;
     private View viewCodeVerificationFragment;
     private SharedViewModel sharedViewModel;;
@@ -100,6 +100,7 @@ public class CodeVerificationFragment extends Fragment {
 
         if (getArguments() != null) {
             email = getArguments().getString("email");
+            state = getArguments().getString("state");
         }
 
         TextView textViewEmail = view.findViewById(R.id.textViewEmail);
@@ -116,11 +117,21 @@ public class CodeVerificationFragment extends Fragment {
                 editTextCode.setError("Введите код");
                 editTextCode.requestFocus();
             } else {
-                User user = sharedViewModel.getUser().getValue();
-                if (user != null) {
-                    registerUserInDb(user, code);
-                } else {
-                    Toast.makeText(getContext(), "Не удалось получить пользователя", Toast.LENGTH_SHORT).show();
+                if(state.equals("register")){
+                    User user = sharedViewModel.getUser().getValue();
+                    if (user != null) {
+                        registerUserInDb(user, code);
+                    } else {
+                        Toast.makeText(getContext(), "Не удалось получить пользователя", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else{
+                    User user = sharedViewModel.getUser().getValue();
+                    if (user != null) {
+                        logInUser(user.getEmail(), code);
+                    } else {
+                        Toast.makeText(getContext(), "Не удалось получить пользователя", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -155,9 +166,34 @@ public class CodeVerificationFragment extends Fragment {
         });
     }
 
+    private void logInUser(String email, String code) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        MainAPI.loginWithCode(email, code, new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    User loggedInUser = response.body();
+                    SharedPrefManager.getInstance(requireContext()).saveUser(loggedInUser);
+                    Toast.makeText(getContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
+                    ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
+                } else {
+                    Toast.makeText(getContext(), "Ошибка входа", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Ошибка сети: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void resendCode() {
         progressBar.setVisibility(View.VISIBLE);
-        MainAPI.sendVerificationCode(email, new Callback<Void>() {
+        MainAPI.sendVerificationCode(email,state, new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 progressBar.setVisibility(View.GONE);
