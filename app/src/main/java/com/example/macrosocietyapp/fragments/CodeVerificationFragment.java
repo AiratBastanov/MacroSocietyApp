@@ -51,7 +51,6 @@ public class CodeVerificationFragment extends Fragment {
     private SharedViewModel sharedViewModel;
     private UserRepository userRepository;
 
-
     private CountDownTimer countDownTimer;
     private final long RESEND_TIMEOUT_MS = 2 * 60 * 1000; // 2 минуты
 
@@ -155,7 +154,7 @@ public class CodeVerificationFragment extends Fragment {
                     sharedViewModel.saveUserToDb(registeredUser);
                     SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Регистрация завершена", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
+                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(new ProfileFragment());
                 } else {
                     Toast.makeText(getContext(), "Ошибка регистрации", Toast.LENGTH_SHORT).show();
                 }
@@ -181,7 +180,7 @@ public class CodeVerificationFragment extends Fragment {
                     sharedViewModel.saveUserToDb(loggedInUser);
                     SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) requireActivity()).replaceFragment(new ProfileFragment());
+                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(new ProfileFragment());
                 } else {
                     Toast.makeText(getContext(), "Ошибка входа", Toast.LENGTH_SHORT).show();
                 }

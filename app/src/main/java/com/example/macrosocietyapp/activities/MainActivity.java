@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (currentUser != null) {
                     sharedViewModel.setUser(currentUser);
-                    replaceFragment(new ProfileFragment());
+                    replaceFragmentClearingBackStack(new ProfileFragment());
                 } else {
                     replaceFragment(new HomeFragment());
                 }
@@ -56,6 +57,16 @@ public class MainActivity extends AppCompatActivity {
             transaction.addToBackStack(null);
         }
         transaction.commit();
+    }
+
+    public void replaceFragmentClearingBackStack(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        // Очищаем back stack
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.mainFrameLayout, fragment);
+        transaction.commit(); // НЕ добавляем в back stack!
     }
 
     @Override
