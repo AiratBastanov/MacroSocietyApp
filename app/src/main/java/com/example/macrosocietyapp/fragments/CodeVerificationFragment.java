@@ -154,7 +154,12 @@ public class CodeVerificationFragment extends Fragment {
                     sharedViewModel.saveUserToDb(registeredUser);
                     SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Регистрация завершена", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(new ProfileFragment());
+                    // Создаем ProfileFragment для нового зарегистрированного пользователя
+                    ProfileFragment profileFragment = ProfileFragment.newInstance(
+                            registeredUser.getId(),
+                            false // Это свой профиль
+                    );
+                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(profileFragment);
                 } else {
                     Toast.makeText(getContext(), "Ошибка регистрации", Toast.LENGTH_SHORT).show();
                 }
@@ -180,7 +185,11 @@ public class CodeVerificationFragment extends Fragment {
                     sharedViewModel.saveUserToDb(loggedInUser);
                     SharedPrefManager.getInstance(requireContext()).clear();
                     Toast.makeText(getContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(new ProfileFragment());
+                    ProfileFragment profileFragment = ProfileFragment.newInstance(
+                            loggedInUser.getId(),
+                            false // Это свой профиль
+                    );
+                    ((MainActivity) requireActivity()).replaceFragmentClearingBackStack(profileFragment);
                 } else {
                     Toast.makeText(getContext(), "Ошибка входа", Toast.LENGTH_SHORT).show();
                 }

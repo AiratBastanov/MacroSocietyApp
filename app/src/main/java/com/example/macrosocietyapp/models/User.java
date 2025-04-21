@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "users")
 public class User {
-
     @PrimaryKey
     @SerializedName("id")
     @Expose
@@ -23,8 +22,20 @@ public class User {
     @Expose
     private String email;
 
+    @SerializedName("createdAt")
+    @Expose
+    private String createdAt;
+
     @Expose(serialize = false, deserialize = false)
-    private boolean isCurrent; // не отправляем на сервер, только локально
+    private boolean isCurrent;
+
+    // Для заявок в друзья
+    @Expose(serialize = false, deserialize = false)
+    private boolean isFriendRequest;
+
+    // Для исходящих заявок
+    @Expose(serialize = false, deserialize = false)
+    private boolean isOutgoingRequest;
 
     public User() {}
 
@@ -44,15 +55,22 @@ public class User {
         this.email = email;
     }
 
+    // Геттеры и сеттеры для всех полей
     public Integer getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
+    public String getCreatedAt() { return createdAt; }
     public boolean isCurrent() { return isCurrent; }
+    public boolean isFriendRequest() { return isFriendRequest; }
+    public boolean isOutgoingRequest() { return isOutgoingRequest; }
 
     public void setId(Integer id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     public void setCurrent(boolean current) { isCurrent = current; }
+    public void setFriendRequest(boolean friendRequest) { isFriendRequest = friendRequest; }
+    public void setOutgoingRequest(boolean outgoingRequest) { isOutgoingRequest = outgoingRequest; }
 }
 
 

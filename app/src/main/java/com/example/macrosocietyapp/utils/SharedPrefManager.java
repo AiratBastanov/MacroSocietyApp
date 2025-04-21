@@ -39,6 +39,15 @@ public class SharedPrefManager {
         return null;
     }
 
+    public int getUserId() {
+        User user = getUser();
+        return user != null ? user.getId() : -1;
+    }
+
+    public boolean isLoggedIn() {
+        return getUser() != null;
+    }
+
     public void clear() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
