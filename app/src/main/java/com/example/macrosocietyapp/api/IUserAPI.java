@@ -25,7 +25,7 @@ public interface IUserAPI {
     Call<User> loginWithCode(@Query("email") String encryptedEmail, @Query("code") String code);
 
     @GET("api/users/byid/{userIdEncrypted}")
-    Call<User> getUserById(@Path(value = "userIdEncrypted") String userIdEncrypted);
+    Call<User> getUserById(@Path("userIdEncrypted") String userIdEncrypted);
 
     @GET("api/users/stats/{userIdEncrypted}")
     Call<UserStats> getUserStats(@Path("userIdEncrypted") String userIdEncrypted);

@@ -78,7 +78,6 @@ public class UserProfileFragment extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         viewUserProfileFragment = inflater.inflate(R.layout.fragment_user_profile, container, false);
-        Log.e("das21", String.valueOf(userId));
         initViews(viewUserProfileFragment);
         loadUserData();
         return viewUserProfileFragment;
@@ -135,8 +134,6 @@ public class UserProfileFragment extends BottomSheetDialogFragment {
             @Override
             public void onSuccess(User u) {
                 user = u;
-                Log.e("das",user.getId().toString());
-                Log.e("das",u.getId().toString());
                 updateUI();
             }
 

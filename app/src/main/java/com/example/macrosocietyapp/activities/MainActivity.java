@@ -21,6 +21,8 @@ import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 import com.example.macrosocietyapp.viewmodel.SharedViewModelFactory;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
 
     private Fragment selectedFragment = null;
+
+    private final Map<Integer, Fragment> fragmentMap = new HashMap<>(); //хрнаит фрагменты, чтобы при каждом нажатии на пункт навигации
 
 
     @Override
@@ -71,6 +75,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleNavigationItemSelected(int itemId) {
+        Fragment fragment = fragmentMap.get(itemId);
+
+        if (fragment == null) {
+            switch (itemId) {
+                case R.id.nav_communities:
+                    fragment = new FeedFragment();
+                    break;
+                case R.id.nav_people:
+                    fragment = new UsersFriendsFragment();
+                    break;
+                case R.id.nav_messages:
+                    fragment = new MessagesFragment();
+                    break;
+                case R.id.nav_profile:
+                    fragment = ProfileFragment.newInstance(sharedViewModel.getUser().getValue().getId(), false);
+                    break;
+            }
+            if (fragment != null) {
+                fragmentMap.put(itemId, fragment);
+            }
+        }
+
+        if (fragment != null && fragment != selectedFragment) {
+            selectedFragment = fragment;
+            replaceFragment(fragment);
+        }
+/*
         switch (itemId) {
             case R.id.nav_communities:
 
@@ -96,17 +127,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.nav_profile:
-                if(selectedFragment instanceof ProfileFragment){
-                    return;
-                }
-                else{
-                    selectedFragment = new ProfileFragment();
-                }
+                if (!(selectedFragment instanceof ProfileFragment)) {
+                    selectedFragment = ProfileFragment.newInstance(
+                            sharedViewModel.getUser().getValue().getId(),
+                            false
+                    );
+                break;
+
+        }
                 break;
         }
         if (selectedFragment != null) {
             replaceFragment(selectedFragment);
-        }
+        }*/
     }
 
     public void replaceFragment(Fragment fragment) {

@@ -79,7 +79,7 @@ public class MainAPI {
     // Добавить в MainAPI
     public static void getUserById(int userId, UserCallback callback) {
         String encryptedId = AesEncryptionService.encrypt(String.valueOf(userId));
-        Log.e("das555",encryptedId);
+        /*Log.e("das555",encryptedId);*/
         userApi.getUserById(encryptedId).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {

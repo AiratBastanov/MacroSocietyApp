@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,22 +20,16 @@ import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.api.callbacks.UsersCallback;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
-import com.example.macrosocietyapp.utils.SharedPrefManager;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link UsersFragment#newInstance} factory method to
+ * Use the {@link UsersListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UsersFragment extends Fragment {
+public class UsersListFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,7 +45,7 @@ public class UsersFragment extends Fragment {
     private List<User> userList = new ArrayList<>();
     private View viewUsersFragment;
 
-    public UsersFragment() {
+    public UsersListFragment() {
         // Required empty public constructor
     }
 
@@ -62,11 +55,11 @@ public class UsersFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment UsersFragment.
+     * @return A new instance of fragment UsersListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static UsersFragment newInstance(String param1, String param2) {
-        UsersFragment fragment = new UsersFragment();
+    public static UsersListFragment newInstance(String param1, String param2) {
+        UsersListFragment fragment = new UsersListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -99,7 +92,7 @@ public class UsersFragment extends Fragment {
                 UserProfileFragment fragment = UserProfileFragment.newInstance(user.getId(), isFriend);
 
                 // Показываем как BottomSheet
-                fragment.show(((AppCompatActivity) requireActivity()).getSupportFragmentManager(), fragment.getTag());
+                fragment.show((requireActivity()).getSupportFragmentManager(), fragment.getTag());
                 if(fragment.isHidden()){
                     fragment.dismiss();
                 }
@@ -130,7 +123,6 @@ public class UsersFragment extends Fragment {
 
     private void loadUsers() {
         // Загрузка пользователей с сервера
-        Log.e("f",AesEncryptionService.encrypt(String.valueOf(((MainActivity) requireActivity()).getUserId())));
         MainAPI.getAllUsers(AesEncryptionService.encrypt(String.valueOf(((MainActivity) requireActivity()).getUserId())), new UsersCallback() {
             @Override
             public void onSuccess(List<User> users) {

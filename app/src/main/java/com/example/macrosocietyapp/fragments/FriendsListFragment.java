@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,21 +18,16 @@ import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.api.callbacks.FriendListCallback;
 import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.models.User;
-import com.example.macrosocietyapp.utils.SharedPrefManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link FriendsFragment#newInstance} factory method to
+ * Use the {@link FriendsListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FriendsFragment extends Fragment {
+public class FriendsListFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -49,7 +43,7 @@ public class FriendsFragment extends Fragment {
     private List<User> friendsList = new ArrayList<>();
     private View viewFriendsFragment;
 
-    public FriendsFragment() {
+    public FriendsListFragment() {
         // Required empty public constructor
     }
 
@@ -59,11 +53,11 @@ public class FriendsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment FriendsFragment.
+     * @return A new instance of fragment FriendsListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FriendsFragment newInstance(String param1, String param2) {
-        FriendsFragment fragment = new FriendsFragment();
+    public static FriendsListFragment newInstance(String param1, String param2) {
+        FriendsListFragment fragment = new FriendsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);

@@ -31,11 +31,7 @@ public class UserRepository {
     }
 
     public void setCurrentUser(User user) {
-        executorService.execute(() -> {
-            userDao.clearCurrentFlag();
-            userDao.insertUser(user);
-            userDao.setCurrentUser(user.getId());
-        });
+        executorService.execute(() -> userDao.replaceCurrentUser(user));
     }
 
     public void clearCurrentUserFlag() {

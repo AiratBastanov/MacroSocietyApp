@@ -18,8 +18,11 @@ public class AesEncryptionService {
 
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
             byte[] encrypted = cipher.doFinal(plainText.getBytes());
-            return Base64.encodeToString(encrypted, Base64.NO_WRAP);
+
+            // Важно: используем Base64.URL_SAFE
+            return Base64.encodeToString(encrypted, Base64.URL_SAFE | Base64.NO_WRAP);
         } catch (Exception e) {
+            e.printStackTrace(); // обязательно выводи ошибку для отладки
             return null;
         }
     }

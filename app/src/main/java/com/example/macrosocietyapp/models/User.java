@@ -1,5 +1,6 @@
 package com.example.macrosocietyapp.models;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
@@ -26,6 +27,7 @@ public class User {
     @Expose
     private String createdAt;
 
+    @ColumnInfo(defaultValue = "0") // стандартное значение, чтобы самому не указывать false (0), когда вставляю нового пользователя
     @Expose(serialize = false, deserialize = false)
     private boolean isCurrent;
 

@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,21 +18,16 @@ import com.example.macrosocietyapp.api.MainAPI;
 import com.example.macrosocietyapp.api.callbacks.FriendRequestsCallback;
 import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.models.FriendRequest;
-import com.example.macrosocietyapp.utils.SharedPrefManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link FriendRequestsFragment#newInstance} factory method to
+ * Use the {@link FriendRequestsListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FriendRequestsFragment extends Fragment {
+public class FriendRequestsListFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -49,7 +43,7 @@ public class FriendRequestsFragment extends Fragment {
     private List<FriendRequest> requestsList = new ArrayList<>();
     private View viewFriendRequestsFragment;
 
-    public FriendRequestsFragment() {
+    public FriendRequestsListFragment() {
         // Required empty public constructor
     }
 
@@ -59,11 +53,11 @@ public class FriendRequestsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment FriendRequestsFragment.
+     * @return A new instance of fragment FriendRequestsListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FriendRequestsFragment newInstance(String param1, String param2) {
-        FriendRequestsFragment fragment = new FriendRequestsFragment();
+    public static FriendRequestsListFragment newInstance(String param1, String param2) {
+        FriendRequestsListFragment fragment = new FriendRequestsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);

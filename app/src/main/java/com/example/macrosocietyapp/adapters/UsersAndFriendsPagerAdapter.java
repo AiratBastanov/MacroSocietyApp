@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.macrosocietyapp.fragments.FriendRequestsFragment;
-import com.example.macrosocietyapp.fragments.FriendsFragment;
-import com.example.macrosocietyapp.fragments.UsersFragment;
+import com.example.macrosocietyapp.fragments.FriendRequestsListFragment;
+import com.example.macrosocietyapp.fragments.FriendsListFragment;
+import com.example.macrosocietyapp.fragments.UsersListFragment;
 
 public class UsersAndFriendsPagerAdapter extends FragmentStateAdapter {
     public UsersAndFriendsPagerAdapter(@NonNull Fragment fragment) {
@@ -17,10 +17,10 @@ public class UsersAndFriendsPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position) {
-            case 0: return new UsersFragment();
-            case 1: return new FriendsFragment();
-            case 2: return new FriendRequestsFragment();
-            default: return new UsersFragment();
+            case 0: return new UsersListFragment();
+            case 1: return new FriendsListFragment();
+            case 2: return new FriendRequestsListFragment();
+            default: return new UsersListFragment();
         }
     }
 
