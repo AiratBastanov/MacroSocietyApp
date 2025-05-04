@@ -28,7 +28,4 @@ public interface ICommunityAPI {
 
     @POST("api/communities/transfer/{communityId}")
     Call<Void> transferOwnership(@Path("communityId") int communityId);
-
-    @POST("api/communities/subscribe")
-    Call<Void> subscribeToCommunity(@Body String encryptedData);
 }

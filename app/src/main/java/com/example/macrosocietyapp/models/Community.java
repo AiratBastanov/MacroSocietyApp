@@ -5,6 +5,7 @@ public class Community {
     private String name;
     private String description;
     private int creatorId;
+    private boolean isMember;
 
     public Community() {}
 
@@ -25,6 +26,9 @@ public class Community {
 
     public int getCreatorId() { return creatorId; }
     public void setCreatorId(int creatorId) { this.creatorId = creatorId; }
+
+    public boolean isMember() { return isMember; }
+    public void setMember(boolean member) { isMember = member; }
 }
 
 

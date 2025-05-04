@@ -14,6 +14,7 @@ import com.example.macrosocietyapp.models.Community;
 import com.example.macrosocietyapp.models.CommunityCreateDto;
 import com.example.macrosocietyapp.models.CommunityMember;
 import com.example.macrosocietyapp.models.FriendRequest;
+import com.example.macrosocietyapp.models.LeaveCommunityRequest;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.models.UserStats;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
@@ -47,6 +48,7 @@ public class MainAPI {
     private static final IFriendsAPI friendsApi = retrofit.create(IFriendsAPI.class);
     private static final IFriendRequestsAPI friendRequestsApi = retrofit.create(IFriendRequestsAPI.class);
     private static final ICommunityAPI communityApi = retrofit.create(ICommunityAPI.class);
+    private static final ICommunityMemberAPI communityMemberApi = retrofit.create(ICommunityMemberAPI.class);
 
     public static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
@@ -383,11 +385,10 @@ public class MainAPI {
     }
 
     public static void subscribeToCommunity(int userId, int communityId, SimpleCallback callback) {
-        CommunityMember member = new CommunityMember(userId, communityId);
-        String json = new Gson().toJson(member);
-        String encrypted = AesEncryptionService.encrypt(json);
+        String encryptedUserId = AesEncryptionService.encrypt(String.valueOf(userId));
+        String encryptedCommunityId = AesEncryptionService.encrypt(String.valueOf(communityId));
 
-        communityApi.subscribeToCommunity(encrypted).enqueue(new Callback<Void>() {
+        communityMemberApi.subscribeToCommunity(encryptedUserId, encryptedCommunityId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
@@ -404,6 +405,26 @@ public class MainAPI {
         });
     }
 
+    public static void unsubscribeFromCommunity(int userId, int communityId, SimpleCallback callback) {
+        String encryptedUserId = AesEncryptionService.encrypt(String.valueOf(userId));
+        String encryptedCommunityId = AesEncryptionService.encrypt(String.valueOf(communityId));
+
+        communityMemberApi.unsubscribeFromCommunity(encryptedUserId, encryptedCommunityId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
 
     public static void deleteCommunity(int communityId, SimpleCallback callback) {
         String encryptedId = AesEncryptionService.encrypt(String.valueOf(communityId));

@@ -46,7 +46,11 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
         holder.description.setText(community.getDescription());
 
         holder.button.setVisibility(View.VISIBLE);
-        holder.button.setText("Подписаться");
+        if (community.isMember()) {
+            holder.button.setText("Отписаться");
+        } else {
+            holder.button.setText("Подписаться");
+        }
         holder.button.setOnClickListener(v -> listener.onJoin(community));
        /* holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, CommunityActivity.class);
