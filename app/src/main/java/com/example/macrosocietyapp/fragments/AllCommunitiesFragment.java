@@ -120,18 +120,29 @@ public class AllCommunitiesFragment extends Fragment {
     }
 
     private void loadCommunities() {
-        MainAPI.getAllCommunities(new CommunityListCallback() {
-            @Override
-            public void onSuccess(List<Community> result) {
-                communities.clear();
-                communities.addAll(result);
-                adapter.notifyDataSetChanged();
-            }
+        User user = sharedViewModel.getUser().getValue();// получи ID пользователя
+        if (user.getId() != null) {
+            MainAPI.getAllCommunities(user.getId(), new CommunityListCallback() {
+                @Override
+                public void onSuccess(List<Community> result) {
+                    if (result.isEmpty()) {
+                        Toast.makeText(getContext(), "Сообщества не найдены", Toast.LENGTH_SHORT).show();
+                    } else {
+                        communities.clear();
+                        communities.addAll(result);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
 
-            @Override
-            public void onError(String error) {
-                Toast.makeText(getContext(), "Ошибка загрузки сообществ: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onError(String error) {
+
+                    Toast.makeText(getContext(), "Ошибка загрузки сообществ: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        else {
+            Toast.makeText(getContext(), "Ошибка! Попробуйте позже", Toast.LENGTH_SHORT).show();
+        }
     }
 }

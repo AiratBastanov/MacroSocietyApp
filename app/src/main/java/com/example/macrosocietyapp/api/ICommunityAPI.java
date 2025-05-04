@@ -14,19 +14,19 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface ICommunityAPI {
-    @GET("api/communities/all")
-    Call<List<Community>> getAllCommunities();
+    @GET("api/communities/all-except-user/{encryptedUserId}")
+    Call<List<Community>> getAllCommunities(@Path("encryptedUserId") String encryptedUserId);
 
     @POST("api/communities/create")
     Call<ResponseBody> createCommunity(@Body CommunityCreateDto dto);
 
-    @GET("communities/user/{userIdEncrypted}")
+    @GET("api/communities/user/{userIdEncrypted}")
     Call<List<Community>> getUserCommunities(@Path("userIdEncrypted") String userIdEncrypted);
 
-    @DELETE("communities/delete/{communityIdEncrypted}")
+    @DELETE("api/communities/delete/{communityIdEncrypted}")
     Call<Void> deleteCommunity(@Path("communityIdEncrypted") String communityIdEncrypted);
 
-    @POST("communities/transfer/{communityId}")
+    @POST("api/communities/transfer/{communityId}")
     Call<Void> transferOwnership(@Path("communityId") int communityId);
 
     @POST("api/communities/subscribe")

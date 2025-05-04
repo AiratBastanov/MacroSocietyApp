@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,16 +106,19 @@ public class MyCommunitiesFragment extends Fragment {
     }
 
     private void loadUserCommunities(int userId) {
+        Log.e("CHECK", String.valueOf(userId));
         MainAPI.getUserCommunities(userId, new CommunityListCallback() {
             @Override
             public void onSuccess(List<Community> communities) {
+                Log.e("CHECK", String.valueOf(communities.size()));
                 myCommunities.clear();
                 myCommunities.addAll(communities);
-                requireActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onError(String errorMessage) {
+                Log.e("CHECK","BAD");
                 Toast.makeText(context, "Ошибка загрузки сообществ: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });

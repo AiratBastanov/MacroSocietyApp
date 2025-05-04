@@ -302,9 +302,10 @@ public class MainAPI {
         });
     }
 
-    // Получение всех сообществ
-    public static void getAllCommunities(CommunityListCallback callback) {
-        communityApi.getAllCommunities().enqueue(new Callback<List<Community>>() {
+    // Получение всех сообществ(кроме своих)
+    public static void getAllCommunities(int userId, CommunityListCallback callback) {
+        String encryptedId = AesEncryptionService.encrypt(String.valueOf(userId));
+        communityApi.getAllCommunities(encryptedId).enqueue(new Callback<List<Community>>() {
             @Override
             public void onResponse(Call<List<Community>> call, Response<List<Community>> response) {
                 if (response.isSuccessful()) {
