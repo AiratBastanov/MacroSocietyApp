@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         if (fragment == null) {
             switch (itemId) {
                 case R.id.nav_communities:
-                    fragment = new FeedFragment();
+                    fragment = new CommunityPageFragment();
                     break;
                 case R.id.nav_people:
                     fragment = new UsersFriendsFragment();
@@ -101,45 +101,6 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment = fragment;
             replaceFragment(fragment);
         }
-/*
-        switch (itemId) {
-            case R.id.nav_communities:
-
-                if (selectedFragment instanceof FeedFragment) {
-                    return;
-                } else {
-                    selectedFragment = new FeedFragment();
-                }
-                break;
-            case R.id.nav_people:
-                if (selectedFragment instanceof UsersFriendsFragment) {
-                    return;
-                } else {
-                    selectedFragment = new UsersFriendsFragment();// Внутри — табы: "Пользователи", "Друзья"
-                }
-                break;
-            case R.id.nav_messages:
-                if (selectedFragment instanceof MessagesFragment) {
-                    return;
-                }
-                else{
-                    selectedFragment = new MessagesFragment();
-                }
-                break;
-            case R.id.nav_profile:
-                if (!(selectedFragment instanceof ProfileFragment)) {
-                    selectedFragment = ProfileFragment.newInstance(
-                            sharedViewModel.getUser().getValue().getId(),
-                            false
-                    );
-                break;
-
-        }
-                break;
-        }
-        if (selectedFragment != null) {
-            replaceFragment(selectedFragment);
-        }*/
     }
 
     public void replaceFragment(Fragment fragment) {

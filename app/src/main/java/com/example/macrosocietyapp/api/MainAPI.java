@@ -2,16 +2,22 @@ package com.example.macrosocietyapp.api;
 
 import android.util.Log;
 
+import com.example.macrosocietyapp.api.callbacks.CommunityCallback;
+import com.example.macrosocietyapp.api.callbacks.CommunityListCallback;
 import com.example.macrosocietyapp.api.callbacks.FriendListCallback;
 import com.example.macrosocietyapp.api.callbacks.FriendRequestsCallback;
 import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.api.callbacks.UserCallback;
 import com.example.macrosocietyapp.api.callbacks.UserStatsCallback;
 import com.example.macrosocietyapp.api.callbacks.UsersCallback;
+import com.example.macrosocietyapp.models.Community;
+import com.example.macrosocietyapp.models.CommunityCreateDto;
+import com.example.macrosocietyapp.models.CommunityMember;
 import com.example.macrosocietyapp.models.FriendRequest;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.models.UserStats;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -23,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,6 +46,7 @@ public class MainAPI {
     private static final IUserAPI userApi = retrofit.create(IUserAPI.class);
     private static final IFriendsAPI friendsApi = retrofit.create(IFriendsAPI.class);
     private static final IFriendRequestsAPI friendRequestsApi = retrofit.create(IFriendRequestsAPI.class);
+    private static final ICommunityAPI communityApi = retrofit.create(ICommunityAPI.class);
 
     public static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
@@ -79,7 +87,6 @@ public class MainAPI {
     // Добавить в MainAPI
     public static void getUserById(int userId, UserCallback callback) {
         String encryptedId = AesEncryptionService.encrypt(String.valueOf(userId));
-        /*Log.e("das555",encryptedId);*/
         userApi.getUserById(encryptedId).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -293,5 +300,154 @@ public class MainAPI {
                 callback.onError(t.getMessage());
             }
         });
+    }
+
+    // Получение всех сообществ
+    public static void getAllCommunities(CommunityListCallback callback) {
+        communityApi.getAllCommunities().enqueue(new Callback<List<Community>>() {
+            @Override
+            public void onResponse(Call<List<Community>> call, Response<List<Community>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Community>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    // Получение сообществ пользователя
+    public static void getUserCommunities(int userId, CommunityListCallback callback) {
+        String encryptedId = AesEncryptionService.encrypt(String.valueOf(userId));
+        communityApi.getUserCommunities(encryptedId).enqueue(new Callback<List<Community>>() {
+            @Override
+            public void onResponse(Call<List<Community>> call, Response<List<Community>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Community>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    // Создание сообщества
+    public static void createCommunity(Community community, CommunityCallback callback) {
+        String encryptedCreatorId = AesEncryptionService.encrypt(String.valueOf(community.getCreatorId()));
+
+        CommunityCreateDto dto = new CommunityCreateDto(
+                community.getName(),
+                community.getDescription(),
+                encryptedCreatorId
+        );
+
+        communityApi.createCommunity(dto).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String encryptedId = response.body().string();
+                        String decryptedId = AesEncryptionService.decrypt(encryptedId);
+
+                        Community createdCommunity = new Community();
+                        createdCommunity.setId(Integer.parseInt(decryptedId));
+                        createdCommunity.setName(community.getName());
+                        createdCommunity.setDescription(community.getDescription());
+                        createdCommunity.setCreatorId(community.getCreatorId());
+
+                        callback.onSuccess(createdCommunity);
+                    } catch (Exception e) {
+                        callback.onError("Ошибка расшифровки ответа: " + e.getMessage());
+                    }
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void subscribeToCommunity(int userId, int communityId, SimpleCallback callback) {
+        CommunityMember member = new CommunityMember(userId, communityId);
+        String json = new Gson().toJson(member);
+        String encrypted = AesEncryptionService.encrypt(json);
+
+        communityApi.subscribeToCommunity(encrypted).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+
+    public static void deleteCommunity(int communityId, SimpleCallback callback) {
+        String encryptedId = AesEncryptionService.encrypt(String.valueOf(communityId));
+        communityApi.deleteCommunity(encryptedId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void transferOwnership(int communityId, SimpleCallback callback) {
+        communityApi.transferOwnership(communityId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    // Вспомогательный метод
+    private static void handleError(Response<?> response, java.util.function.Consumer<String> errorConsumer) {
+        try {
+            String errorMessage = response.errorBody() != null ? response.errorBody().string() : "Неизвестная ошибка";
+            errorConsumer.accept(errorMessage);
+        } catch (IOException e) {
+            errorConsumer.accept("Ошибка чтения тела ответа");
+        }
     }
 }
