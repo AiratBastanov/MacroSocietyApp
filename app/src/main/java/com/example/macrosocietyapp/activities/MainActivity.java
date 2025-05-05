@@ -144,6 +144,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void logoutAndReturnToHome() {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            runOnUiThread(() -> {
+                repository.deleteAllUsers(); // удаление всех пользователей
+                sharedViewModel.clearUser(); // сброс текущего пользователя через ViewModel
+                currentUser = null;
+                fragmentMap.clear(); // сброс кэша фрагментов
+                replaceFragmentClearingBackStack(new HomeFragment());
+                bottomNav.setVisibility(View.GONE);
+            });
+        });
+    }
+
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {

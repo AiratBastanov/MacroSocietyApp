@@ -24,10 +24,13 @@ import com.example.macrosocietyapp.api.callbacks.UserCallback;
 import com.example.macrosocietyapp.api.callbacks.UserStatsCallback;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.models.UserStats;
+import com.example.macrosocietyapp.saveUserRoom.UserRepository;
 import com.example.macrosocietyapp.utils.CircleTransform;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,8 +51,8 @@ public class ProfileFragment extends Fragment {
     private ImageView profileImage;
     private TextView profileName, profileEmail, profileBio;
     private TextView friendsCount, postsCount, communitiesCount;
-    private Button editProfileBtn, messageBtn, addFriendBtn, removeFriendBtn;
     private View viewProfileFragment;
+    Button logoutButton;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -77,7 +80,6 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
 
         if (getArguments() != null) {
             userId = getArguments().getInt(ARG_USER_ID, -1);
@@ -114,13 +116,11 @@ public class ProfileFragment extends Fragment {
         postsCount = view.findViewById(R.id.postsCount);
         communitiesCount = view.findViewById(R.id.communitiesCount);
 
-        messageBtn = view.findViewById(R.id.messageBtn);
-        addFriendBtn = view.findViewById(R.id.addFriendBtn);
-        removeFriendBtn = view.findViewById(R.id.removeFriendBtn);
+        logoutButton = view.findViewById(R.id.button_logout);
 
-        messageBtn.setOnClickListener(v -> openMessages());
-        addFriendBtn.setOnClickListener(v -> sendFriendRequest());
-        removeFriendBtn.setOnClickListener(v -> removeFriend());
+        logoutButton.setOnClickListener(v -> {
+            logout();
+        });
     }
 
     private void setupProfile() {
@@ -128,7 +128,7 @@ public class ProfileFragment extends Fragment {
             profileName.setText(user.getName());
             profileEmail.setText(user.getEmail());
 
-            if (isCurrentUser) {
+            /*if (isCurrentUser) {
                 messageBtn.setVisibility(View.GONE);
                 addFriendBtn.setVisibility(View.GONE);
                 removeFriendBtn.setVisibility(View.GONE);
@@ -140,7 +140,7 @@ public class ProfileFragment extends Fragment {
                 messageBtn.setVisibility(View.GONE);
                 removeFriendBtn.setVisibility(View.GONE);
                 addFriendBtn.setVisibility(View.VISIBLE);
-            }
+            }*/
 
             loadUserStats(user.getId());
         }
@@ -189,50 +189,7 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-  /*  private void editProfile() {
-        // Переход к редактированию профиля
-        startActivity(new Intent(getActivity(), EditProfileActivity.class));
-    }*/
-
-    private void openMessages() {
-        // Открытие чата с пользователем
-        /*Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra("user_id", user.getId());
-        startActivity(intent);*/
-        ((MainActivity) requireActivity()).replaceFragment(new MessagesFragment());
-    }
-
-    private void sendFriendRequest() {
-        int currentUserId = ((MainActivity) requireActivity()).getUserId();
-        MainAPI.sendFriendRequest(currentUserId, user.getId(), new SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(getContext(), "Заявка отправлена", Toast.LENGTH_SHORT).show();
-                addFriendBtn.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onError(String error) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void removeFriend() {
-        int currentUserId = ((MainActivity) requireActivity()).getUserId();
-        MainAPI.removeFriend(currentUserId, user.getId(), new SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(getContext(), "Пользователь удален из друзей", Toast.LENGTH_SHORT).show();
-                removeFriendBtn.setVisibility(View.GONE);
-                addFriendBtn.setVisibility(View.VISIBLE);
-                isFriend = false;
-            }
-
-            @Override
-            public void onError(String error) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void logout() {
+        ((MainActivity) requireActivity()).logoutAndReturnToHome();
     }
 }

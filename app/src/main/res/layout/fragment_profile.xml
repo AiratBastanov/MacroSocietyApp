@@ -20,6 +20,22 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp">
 
+            <!-- Кнопка выхода в правом верхнем углу -->
+            <Button
+                android:id="@+id/button_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Выход"
+                android:textSize="14sp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:backgroundTint="#DB1616"
+                android:textColor="@android:color/white"
+                android:minHeight="36dp"
+                android:minWidth="72dp"
+                android:paddingHorizontal="8dp"
+                android:layout_marginBottom="8dp" />
+
             <ImageView
                 android:id="@+id/profileImage"
                 android:layout_width="100dp"
@@ -131,39 +147,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Кнопки действий -->
-        <LinearLayout
-            android:id="@+id/actionButtonsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="3">
-
-            <Button
-                android:id="@+id/messageBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Сообщение"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/addFriendBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Добавить"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/removeFriendBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Удалить"
-                android:visibility="gone" />
-        </LinearLayout>
-
         <!-- Описание -->
         <TextView
             android:id="@+id/profileBio"
@@ -190,6 +173,5 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:nestedScrollingEnabled="false" />
-
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
