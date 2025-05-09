@@ -92,44 +92,52 @@ public class AllCommunitiesFragment extends Fragment {
         recyclerView = viewAllCommunitiesFragment.findViewById(R.id.recyclerViewCommunities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new CommunityAdapter(communities, getContext(), community -> {
-            User user = sharedViewModel.getUser().getValue();
-            if (user.getId() != null) {
-                if (community.isMember()) {
-                    // ОТПИСКА
-                    MainAPI.unsubscribeFromCommunity(user.getId(), community.getId(), new SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            community.setMember(false);
-                            adapter.notifyDataSetChanged();
-                            Toast.makeText(getContext(), "Вы отписались от: " + community.getName(), Toast.LENGTH_SHORT).show();
-                        }
+        adapter = new CommunityAdapter(communities, getContext(),
+                community -> {
+                    // ПОДПИСКА / ОТПИСКА
+                    User user = sharedViewModel.getUser().getValue();
+                    if (user.getId() != null) {
+                        if (community.isMember()) {
+                            MainAPI.unsubscribeFromCommunity(user.getId(), community.getId(), new SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    community.setMember(false);
+                                    adapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(), "Вы отписались от: " + community.getName(), Toast.LENGTH_SHORT).show();
+                                }
 
-                        @Override
-                        public void onError(String errorMessage) {
-                            Toast.makeText(getContext(), "Ошибка: " + errorMessage, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    // ПОДПИСКА
-                    MainAPI.subscribeToCommunity(user.getId(), community.getId(), new SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            community.setMember(true);
-                            adapter.notifyDataSetChanged();
-                            Toast.makeText(getContext(), "Вы подписались на: " + community.getName(), Toast.LENGTH_SHORT).show();
-                        }
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Toast.makeText(getContext(), "Ошибка: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            MainAPI.subscribeToCommunity(user.getId(), community.getId(), new SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    community.setMember(true);
+                                    adapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(), "Вы подписались на: " + community.getName(), Toast.LENGTH_SHORT).show();
+                                }
 
-                        @Override
-                        public void onError(String errorMessage) {
-                            Toast.makeText(getContext(), "Ошибка: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Toast.makeText(getContext(), "Ошибка: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
-                    });
+                    } else {
+                        Toast.makeText(getContext(), "Ошибка! Попробуйте позже", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                community -> {
+                    //открытие сообщества
+                    CommunityPostsFragment dialog = CommunityPostsFragment.newInstance(
+                            community.getId(), community.getName(), community.getDescription()
+                    );
+                    dialog.show(getParentFragmentManager(), "community_dialog");
                 }
-            } else {
-                Toast.makeText(getContext(), "Ошибка! Попробуйте позже", Toast.LENGTH_SHORT).show();
-            }
-        });
+        );
 
         recyclerView.setAdapter(adapter);
 

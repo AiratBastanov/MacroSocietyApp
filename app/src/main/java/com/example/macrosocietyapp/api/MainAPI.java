@@ -1,11 +1,14 @@
 package com.example.macrosocietyapp.api;
 
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.macrosocietyapp.api.callbacks.AddPostCallback;
 import com.example.macrosocietyapp.api.callbacks.CommunityCallback;
 import com.example.macrosocietyapp.api.callbacks.CommunityListCallback;
 import com.example.macrosocietyapp.api.callbacks.FriendListCallback;
 import com.example.macrosocietyapp.api.callbacks.FriendRequestsCallback;
+import com.example.macrosocietyapp.api.callbacks.PostsCallback;
 import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.api.callbacks.UserCallback;
 import com.example.macrosocietyapp.api.callbacks.UserStatsCallback;
@@ -15,10 +18,14 @@ import com.example.macrosocietyapp.models.CommunityCreateDto;
 import com.example.macrosocietyapp.models.CommunityMember;
 import com.example.macrosocietyapp.models.FriendRequest;
 import com.example.macrosocietyapp.models.LeaveCommunityRequest;
+import com.example.macrosocietyapp.models.Post;
+import com.example.macrosocietyapp.models.PostDto;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.models.UserStats;
 import com.example.macrosocietyapp.utils.AesEncryptionService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -39,16 +46,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainAPI {
     private static final String baseUrl = "http://10.0.2.2:5000/";
+
+    private static final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .create();
+
     private static final Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(getUnsafeOkHttpClient().build())
             .build();
+
     private static final IUserAPI userApi = retrofit.create(IUserAPI.class);
     private static final IFriendsAPI friendsApi = retrofit.create(IFriendsAPI.class);
     private static final IFriendRequestsAPI friendRequestsApi = retrofit.create(IFriendRequestsAPI.class);
     private static final ICommunityAPI communityApi = retrofit.create(ICommunityAPI.class);
     private static final ICommunityMemberAPI communityMemberApi = retrofit.create(ICommunityMemberAPI.class);
+    private static final IPostsAPI postsAPI = retrofit.create(IPostsAPI.class);
 
     public static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
@@ -458,6 +472,46 @@ public class MainAPI {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void getPostsByCommunity(String encryptedCommunityId, PostsCallback callback) {
+        postsAPI.getCommunityPosts(encryptedCommunityId).enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Ошибка загрузки постов");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void addPost(PostDto postDto, AddPostCallback callback) {
+        postsAPI.addPost(postDto).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    String postId = body.get("postId").getAsString();
+                    String createdAt = body.get("createdAt").getAsString();
+
+                    callback.onSuccess(postId, createdAt);
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
                 callback.onError(t.getMessage());
             }
         });

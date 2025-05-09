@@ -21,15 +21,21 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
     private final List<Community> communityList;
     private final Context context;
     private final OnJoinClickListener listener;
+    private final OnOpenCommunityClickListener listenerToOpenCommunity;
 
     public interface OnJoinClickListener {
         void onJoin(Community community);
     }
 
-    public CommunityAdapter(List<Community> communityList, Context context, OnJoinClickListener listener) {
+    public interface OnOpenCommunityClickListener {
+        void onOpenCommunity(Community community);
+    }
+
+    public CommunityAdapter(List<Community> communityList, Context context, OnJoinClickListener listener,OnOpenCommunityClickListener listenerToOpenCommunity) {
         this.communityList = communityList;
         this.context = context;
         this.listener = listener;
+        this.listenerToOpenCommunity = listenerToOpenCommunity;
     }
 
     @NonNull
@@ -52,6 +58,7 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
             holder.button.setText("Подписаться");
         }
         holder.button.setOnClickListener(v -> listener.onJoin(community));
+        holder.name.setOnClickListener(v -> listenerToOpenCommunity.onOpenCommunity(community));
        /* holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, CommunityActivity.class);
             intent.putExtra("communityId", community.getId());
