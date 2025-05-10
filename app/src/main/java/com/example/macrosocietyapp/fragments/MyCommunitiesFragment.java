@@ -91,7 +91,11 @@ public class MyCommunitiesFragment extends Fragment {
         recyclerView = viewMyCommunitiesFragment.findViewById(R.id.recyclerMyCommunities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new UserCommunityAdapter(myCommunities, this::showActionDialog);
+        adapter = new UserCommunityAdapter(
+                myCommunities,
+                this::showActionDialog,        // обработка "Удалить" — твой AlertDialog
+                this::openCommunityDetails     // открытие по клику на имя
+        );
         recyclerView.setAdapter(adapter);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -172,5 +176,12 @@ public class MyCommunitiesFragment extends Fragment {
                 Toast.makeText(context, "Ошибка удаления: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void openCommunityDetails(Community community) {
+        //открытие сообщества
+        CommunityPostsFragment dialog = CommunityPostsFragment.newInstance(
+                community.getId(), community.getName(), community.getDescription());
+        dialog.show(getParentFragmentManager(), "community_dialog");
     }
 }

@@ -59,11 +59,6 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
         }
         holder.button.setOnClickListener(v -> listener.onJoin(community));
         holder.name.setOnClickListener(v -> listenerToOpenCommunity.onOpenCommunity(community));
-       /* holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, CommunityActivity.class);
-            intent.putExtra("communityId", community.getId());
-            context.startActivity(intent);
-        });*/
     }
 
     @Override

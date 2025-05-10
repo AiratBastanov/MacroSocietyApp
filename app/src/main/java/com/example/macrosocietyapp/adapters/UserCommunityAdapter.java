@@ -16,16 +16,23 @@ import java.util.List;
 
 public class UserCommunityAdapter extends RecyclerView.Adapter<UserCommunityAdapter.CommunityViewHolder> {
 
+    private final CommunityAdapter.OnOpenCommunityClickListener listenerToOpenCommunity;
+
     public interface OnDeleteClickListener {
         void onDelete(Community community);
+    }
+
+    public interface OnOpenCommunityClickListener {
+        void onOpenCommunity(Community community);
     }
 
     private final List<Community> communities;
     private final OnDeleteClickListener clickListener;
 
-    public UserCommunityAdapter(List<Community> communities, OnDeleteClickListener clickListener) {
+    public UserCommunityAdapter(List<Community> communities, OnDeleteClickListener clickListener, CommunityAdapter.OnOpenCommunityClickListener listenerToOpenCommunity) {
         this.communities = communities;
         this.clickListener = clickListener;
+        this.listenerToOpenCommunity = listenerToOpenCommunity;
     }
 
     @NonNull
@@ -41,6 +48,8 @@ public class UserCommunityAdapter extends RecyclerView.Adapter<UserCommunityAdap
         Community community = communities.get(position);
         holder.name.setText(community.getName());
         holder.description.setText(community.getDescription());
+
+        holder.name.setOnClickListener(v -> listenerToOpenCommunity.onOpenCommunity(community));
 
         holder.button.setVisibility(View.VISIBLE);
         holder.button.setText("Удалить");
