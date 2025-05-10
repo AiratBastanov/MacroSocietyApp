@@ -495,6 +495,24 @@ public class MainAPI {
         });
     }
 
+    public static void getPostsByUser(String encryptedUserId, PostsCallback callback) {
+        postsAPI.getUsersPosts(encryptedUserId).enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Ошибка загрузки постов");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     public static void addPost(PostDto postDto, AddPostCallback callback) {
         postsAPI.addPost(postDto).enqueue(new Callback<JsonObject>() {
             @Override

@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,18 +20,24 @@ import android.widget.Toast;
 
 import com.example.macrosocietyapp.R;
 import com.example.macrosocietyapp.activities.MainActivity;
+import com.example.macrosocietyapp.adapters.PostsAdapter;
 import com.example.macrosocietyapp.api.MainAPI;
+import com.example.macrosocietyapp.api.callbacks.PostsCallback;
 import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.api.callbacks.UserCallback;
 import com.example.macrosocietyapp.api.callbacks.UserStatsCallback;
+import com.example.macrosocietyapp.models.Post;
 import com.example.macrosocietyapp.models.User;
 import com.example.macrosocietyapp.models.UserStats;
 import com.example.macrosocietyapp.saveUserRoom.UserRepository;
+import com.example.macrosocietyapp.utils.AesEncryptionService;
 import com.example.macrosocietyapp.utils.CircleTransform;
 import com.example.macrosocietyapp.utils.SharedPrefManager;
 import com.example.macrosocietyapp.viewmodel.SharedViewModel;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 /**
@@ -53,6 +61,9 @@ public class ProfileFragment extends Fragment {
     private TextView friendsCount, postsCount, communitiesCount;
     private View viewProfileFragment;
     Button logoutButton;
+    private RecyclerView postsRecyclerView;
+    private PostsAdapter postsAdapter;
+    private List<Post> postList = new ArrayList<>();
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -115,6 +126,12 @@ public class ProfileFragment extends Fragment {
         friendsCount = view.findViewById(R.id.friendsCount);
         postsCount = view.findViewById(R.id.postsCount);
         communitiesCount = view.findViewById(R.id.communitiesCount);
+
+        postsRecyclerView = view.findViewById(R.id.postsRecyclerView);
+
+        postsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        postsAdapter = new PostsAdapter(postList);
+        postsRecyclerView.setAdapter(postsAdapter);
 
         logoutButton = view.findViewById(R.id.button_logout);
 
@@ -185,6 +202,20 @@ public class ProfileFragment extends Fragment {
                     postsCount.setText("-");
                     communitiesCount.setText("-");
                 });
+            }
+        });
+        String encryptedId = AesEncryptionService.encrypt(String.valueOf(userId));
+        MainAPI.getPostsByUser(encryptedId, new PostsCallback() {
+            @Override
+            public void onSuccess(List<Post> posts) {
+                postList.clear();
+                postList.addAll(posts);
+                postsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(getContext(), "Ошибка загрузки постов: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }

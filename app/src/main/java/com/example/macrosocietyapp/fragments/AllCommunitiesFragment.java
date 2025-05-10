@@ -131,11 +131,12 @@ public class AllCommunitiesFragment extends Fragment {
                     }
                 },
                 community -> {
-                    //открытие сообщества
-                    CommunityPostsFragment dialog = CommunityPostsFragment.newInstance(
-                            community.getId(), community.getName(), community.getDescription()
-                    );
-                    dialog.show(getParentFragmentManager(), "community_dialog");
+                    if (community.isMember()) {
+                        //открытие сообщества
+                        CommunityPostsFragment dialog = CommunityPostsFragment.newInstance(
+                                community.getId(), community.getName(), community.getDescription());
+                        dialog.show(getParentFragmentManager(), "community_dialog");
+                    }
                 }
         );
 

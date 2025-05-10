@@ -16,6 +16,9 @@ public interface IPostsAPI {
     @GET("api/posts/community/{encryptedCommunityId}")
     Call<List<Post>> getCommunityPosts(@Path("encryptedCommunityId") String encryptedId);
 
+    @GET("api/posts/user/{userIdEncrypted}")
+    Call<List<Post>> getUsersPosts(@Path("userIdEncrypted") String userIdEncrypted);
+
     @POST("api/posts/add")
     Call<JsonObject> addPost(@Body PostDto postDto);
 }
