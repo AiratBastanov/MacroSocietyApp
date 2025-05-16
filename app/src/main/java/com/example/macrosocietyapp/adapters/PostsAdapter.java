@@ -3,12 +3,15 @@ package com.example.macrosocietyapp.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.macrosocietyapp.R;
+import com.example.macrosocietyapp.models.Community;
 import com.example.macrosocietyapp.models.Post;
 
 import java.text.SimpleDateFormat;
@@ -18,9 +21,15 @@ import java.util.Locale;
 public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHolder> {
 
     private List<Post> posts;
+    private OnCommentClickListener commentClickListener;
 
-    public PostsAdapter(List<Post> posts) {
+    public interface OnCommentClickListener {
+        void onCommentClick(Post post);
+    }
+
+    public PostsAdapter(List<Post> posts,OnCommentClickListener listener) {
         this.posts = posts;
+        this.commentClickListener = listener;
     }
 
     @NonNull
@@ -43,6 +52,11 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
         } else {
             holder.textCreatedAt.setText("");
         }
+        holder.buttonComments.setOnClickListener(v -> {
+            if (commentClickListener != null) {
+                commentClickListener.onCommentClick(post);
+            }
+        });
     }
 
     @Override
@@ -52,12 +66,14 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
         TextView textUsername, textCreatedAt, textContent;
+        ImageButton buttonComments;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
             textUsername = itemView.findViewById(R.id.textUsername);
             textCreatedAt = itemView.findViewById(R.id.textCreatedAt);
             textContent = itemView.findViewById(R.id.textContent);
+            buttonComments = itemView.findViewById(R.id.btnComments);
         }
     }
 }

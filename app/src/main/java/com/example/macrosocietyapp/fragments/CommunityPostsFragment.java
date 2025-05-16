@@ -99,7 +99,11 @@ public class CommunityPostsFragment extends BottomSheetDialogFragment {
         postsRecyclerView = viewCommunityPostsFragment.findViewById(R.id.recyclerViewPosts);
 
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        postsAdapter = new PostsAdapter(postList);
+        postsAdapter = new PostsAdapter(postList,
+                post -> {
+                    CommentBottomSheetDialogFragment dialog = CommentBottomSheetDialogFragment.newInstance(post.getId());
+                    dialog.show(getParentFragmentManager(), "comments_dialog");
+                });
         postsRecyclerView.setAdapter(postsAdapter);
 
         communityId = getArguments().getInt(ARG_COMMUNITY_ID);
@@ -189,11 +193,14 @@ public class CommunityPostsFragment extends BottomSheetDialogFragment {
                 postsAdapter.notifyItemInserted(0);
                 postsRecyclerView.scrollToPosition(0);
             }
-
             @Override
             public void onError(String error) {
                 Toast.makeText(getContext(), "Ошибка при добавлении поста: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void openCommentsPost(){
+
     }
 }

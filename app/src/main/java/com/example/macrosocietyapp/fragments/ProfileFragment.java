@@ -130,7 +130,10 @@ public class ProfileFragment extends Fragment {
         postsRecyclerView = view.findViewById(R.id.postsRecyclerView);
 
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        postsAdapter = new PostsAdapter(postList);
+        postsAdapter = new PostsAdapter(postList,
+                post -> {
+
+                });
         postsRecyclerView.setAdapter(postsAdapter);
 
         logoutButton = view.findViewById(R.id.button_logout);

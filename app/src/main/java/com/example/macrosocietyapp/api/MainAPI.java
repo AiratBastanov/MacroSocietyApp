@@ -4,6 +4,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.macrosocietyapp.api.callbacks.AddPostCallback;
+import com.example.macrosocietyapp.api.callbacks.BaseCommentCallback;
+import com.example.macrosocietyapp.api.callbacks.CommentsCallback;
 import com.example.macrosocietyapp.api.callbacks.CommunityCallback;
 import com.example.macrosocietyapp.api.callbacks.CommunityListCallback;
 import com.example.macrosocietyapp.api.callbacks.FriendListCallback;
@@ -13,11 +15,12 @@ import com.example.macrosocietyapp.api.callbacks.SimpleCallback;
 import com.example.macrosocietyapp.api.callbacks.UserCallback;
 import com.example.macrosocietyapp.api.callbacks.UserStatsCallback;
 import com.example.macrosocietyapp.api.callbacks.UsersCallback;
+import com.example.macrosocietyapp.models.Comment;
 import com.example.macrosocietyapp.models.Community;
 import com.example.macrosocietyapp.models.CommunityCreateDto;
-import com.example.macrosocietyapp.models.CommunityMember;
+import com.example.macrosocietyapp.models.CreateCommentRequest;
+import com.example.macrosocietyapp.models.CreateCommentResponse;
 import com.example.macrosocietyapp.models.FriendRequest;
-import com.example.macrosocietyapp.models.LeaveCommunityRequest;
 import com.example.macrosocietyapp.models.Post;
 import com.example.macrosocietyapp.models.PostDto;
 import com.example.macrosocietyapp.models.User;
@@ -27,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+
 import java.io.IOException;
 import java.security.SecureRandom;
 
@@ -34,6 +38,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -63,6 +68,7 @@ public class MainAPI {
     private static final ICommunityAPI communityApi = retrofit.create(ICommunityAPI.class);
     private static final ICommunityMemberAPI communityMemberApi = retrofit.create(ICommunityMemberAPI.class);
     private static final IPostsAPI postsAPI = retrofit.create(IPostsAPI.class);
+    private static final ICommentsAPI commentsAPI= retrofit.create(ICommentsAPI.class);
 
     public static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
@@ -530,6 +536,52 @@ public class MainAPI {
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void getCommentsByPost(String encryptedPostId, CommentsCallback callback) {
+        commentsAPI.getPostComments(encryptedPostId).enqueue(new Callback<List<Comment>>() {
+            @Override
+            public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Comment> decryptedComments = new ArrayList<>();
+                    for (Comment rawComment : response.body()) {
+                        try {
+                            rawComment.decryptFields();
+                            decryptedComments.add(rawComment);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    callback.onSuccess(decryptedComments);
+                } else {
+                    callback.onError("Ошибка загрузки комментариев: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Comment>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public static void createComment(CreateCommentRequest request, BaseCommentCallback callback) {
+        commentsAPI.createComment(request).enqueue(new Callback<CreateCommentResponse>() {
+            @Override
+            public void onResponse(Call<CreateCommentResponse> call, Response<CreateCommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CreateCommentResponse res = response.body();
+                    callback.onSuccess(res.getCommentId(), res.getCreatedAt());
+                } else {
+                    handleError(response, callback::onError);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreateCommentResponse> call, Throwable t) {
                 callback.onError(t.getMessage());
             }
         });

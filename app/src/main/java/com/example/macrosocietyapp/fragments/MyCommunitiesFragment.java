@@ -110,11 +110,9 @@ public class MyCommunitiesFragment extends Fragment {
     }
 
     private void loadUserCommunities(int userId) {
-        Log.e("CHECK", String.valueOf(userId));
         MainAPI.getUserCommunities(userId, new CommunityListCallback() {
             @Override
             public void onSuccess(List<Community> communities) {
-                Log.e("CHECK", String.valueOf(communities.size()));
                 myCommunities.clear();
                 myCommunities.addAll(communities);
                 adapter.notifyDataSetChanged();
@@ -122,7 +120,6 @@ public class MyCommunitiesFragment extends Fragment {
 
             @Override
             public void onError(String errorMessage) {
-                Log.e("CHECK","BAD");
                 Toast.makeText(context, "Ошибка загрузки сообществ: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
